@@ -244,7 +244,8 @@ def generate_icon():
     import random
     code = "%032x" % random.getrandbits(128)
     code = int(code[2:], 16)
-    return render_identicon(code, 24)
+    render_identicon(code, 24)
+    return code
 
 if __name__ == '__main__':
     generate_icon()

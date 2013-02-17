@@ -16,23 +16,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def generate_icon(self):
         #self.icon, self.canvas = identicon.generate_icon(self.icon_count)
-        self.icon, self.canvas = identicon.generate_icon()
+        self.hashcode = identicon.generate_icon()
         self.update_view()
 
     def update_view(self):
+        self.lb_icon.setText(str(self.hashcode))
         scene = QGraphicsScene()
+        scene.addPixmap(QPixmap("icon.png"))
+        self.gv_icon.setScene(scene)
         scene.addPixmap(QPixmap("canvas.png"))
-        self.graphicsView.setScene(scene)
-        self.graphicsView.show()
+        self.gv_canvas.setScene(scene)
+        #self.graphicsView.show()
 
     def keyPressEvent(self, event):
         key = event.key()
 
         if key == Qt.Key_N:
             self.generate_icon()
-        if key == Qt.Key_J:
-            self.increase_icon()
-            #self.icon.save("element.png", 'PNG')
+        if key == Qt.Key_Q:
+            self.close()
+        if key == Qt.Key_S:
+            pass
 
         QMainWindow.keyPressEvent(self, event)
 
