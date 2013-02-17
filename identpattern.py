@@ -21,9 +21,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def update_view(self):
         scene = QGraphicsScene()
+
+        scene.addPixmap(QPixmap("icon.png"))
+        self.gv_icon.setScene(scene)
         scene.addPixmap(QPixmap("canvas.png"))
-        self.graphicsView.setScene(scene)
-        self.graphicsView.show()
+        self.gv_canvas.setScene(scene)
+        #self.graphicsView.show()
 
     def keyPressEvent(self, event):
         key = event.key()
