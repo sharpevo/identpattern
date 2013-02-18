@@ -16,7 +16,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def generate_icon(self):
         #self.icon, self.canvas = identicon.generate_icon(self.icon_count)
-        self.hashcode = identicon.generate_icon()
+        self.hashcode = identicon.generate_icon(111)
         self.update_view()
 
     def update_view(self):
