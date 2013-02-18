@@ -37,6 +37,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         scene.addPixmap(QPixmap("canvas.png"))
         self.gv_canvas.setScene(scene)
         #self.graphicsView.show()
+        self.statusbar.clearMessage()
 
     def make_label(self):
         label_list = []
@@ -61,6 +62,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         timestamp = time.strftime("%Y_%m_%d")
         eps_file = "%s/%s-%s.eps" % (output_folder, timestamp, self.hashcode)
         shutil.copyfile("tmp.eps", eps_file)
+        self.statusbar.showMessage("Save EPS file to %s" % eps_file)
 
     def keyPressEvent(self, event):
         key = event.key()
