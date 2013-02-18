@@ -21,8 +21,9 @@ class CommandStack:
         ## need to update length after cutting.
         if len(self.item_list) == self.max_length:
             self.item_list.pop(0)
+        else:
+            self.cursor += 1
         self.item_list.append(item)
-        self.cursor += 1
 
     def move_cursor_forward(self):
         """We have ensured the cursor will not grow over the max_length. """
