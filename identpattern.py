@@ -58,7 +58,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def export_EPS(self):
         output_folder = "/home/ryan/local/scripts/python/identpattern/EPS"
-        timestamp = time.strftime("%Y_%m_%d-%H_%M")
+        timestamp = time.strftime("%Y_%m_%d")
         eps_file = "%s/%s-%s.eps" % (output_folder, timestamp, self.hashcode)
         shutil.copyfile("tmp.eps", eps_file)
 
