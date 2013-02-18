@@ -50,7 +50,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def generate_icon_in_history_backward(self):
         self.history.move_cursor_backward()
-
         self.generate_icon_by_code(self.history.get_item())
 
     def generate_icon_in_history_forward(self):
@@ -85,22 +84,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 if __name__ == "__main__":
 
-
-    #app = QApplication(sys.argv)
-
-    #grview = QGraphicsView()
-    #scene = QGraphicsScene()
-
-
-    #app = QApplication(sys.argv)
-    #main_window = MainWindow()
-
-    #scene.addPixmap(QPixmap('pic.jpg'))
-    #grview.setScene(scene)
-
-    #grview.show()
-
-    #sys.exit(app.exec_())
     import sys
     app = QApplication(sys.argv)
     main_window = MainWindow()
