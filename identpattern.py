@@ -18,16 +18,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def generate_icon(self):
         """generate icon and add hash code to history"""
+
         self.generate_icon_by_code(0)
-        self.history.add_item(self.hashcode)
+        #self.history.add_item(self.hashcode)
 
     def generate_icon_by_code(self, code):
         self.hashcode = identicon.generate_icon(code)
+        if not code:
+            self.history.add_item(self.hashcode)
         self.update_view()
 
-
     def update_view(self):
-        self.lb_icon.setText(str(self.history.item_list))
+        self.make_label()
         scene = QGraphicsScene()
         scene.addPixmap(QPixmap("icon.png"))
         self.gv_icon.setScene(scene)
@@ -35,8 +37,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.gv_canvas.setScene(scene)
         #self.graphicsView.show()
 
+    def make_label(self):
+        label_list = []
+        for item in self.history.item_list:
+            if self.hashcode == item:
+                item = "<font color='blue'>%s</font>" % self.hashcode
+            else:
+                item = str(item)
+            label_list.append(item)
+        self.lb_icon.setText("<br/>".join(label_list))
+
     def generate_icon_in_history_backward(self):
         self.history.move_cursor_backward()
+
         self.generate_icon_by_code(self.history.get_item())
 
     def generate_icon_in_history_forward(self):
