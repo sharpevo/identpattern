@@ -240,10 +240,12 @@ def render_identicon(code, size, renderer=None):
         renderer = DonRenderer
     return renderer(code).render(size)
 
-def generate_icon():
-    import random
-    code = "%032x" % random.getrandbits(128)
-    code = int(code[2:], 16)
+def generate_icon(hash_code=0):
+    code = hash_code
+    if not code:
+        import random
+        code = "%032x" % random.getrandbits(128)
+        code = int(code[2:], 16)
     render_identicon(code, 24)
     return code
 
