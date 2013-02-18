@@ -1,4 +1,5 @@
-
+import time
+import shutil
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from ui_main import Ui_MainWindow
@@ -36,6 +37,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         scene.addPixmap(QPixmap("canvas.png"))
         self.gv_canvas.setScene(scene)
         #self.graphicsView.show()
+        self.statusbar.clearMessage()
 
     def make_label(self):
         label_list = []
@@ -49,18 +51,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def generate_icon_in_history_backward(self):
         self.history.move_cursor_backward()
-
         self.generate_icon_by_code(self.history.get_item())
 
     def generate_icon_in_history_forward(self):
         self.history.move_cursor_forward()
         self.generate_icon_by_code(self.history.get_item())
 
+    def export_EPS(self):
+        output_folder = "/home/ryan/local/scripts/python/identpattern/EPS"
+        timestamp = time.strftime("%Y_%m_%d")
+        eps_file = "%s/%s-%s.eps" % (output_folder, timestamp, self.hashcode)
+        shutil.copyfile("tmp.eps", eps_file)
+        self.statusbar.showMessage("Save EPS file to %s" % eps_file)
+
     def keyPressEvent(self, event):
         key = event.key()
 
         if key == Qt.Key_J:
-            if self.history.cursor == len(self.history.item_list) - 1:
+            #print self.history.cursor, len(self.history.item_list) - 1
+            if self.history.cursor >= len(self.history.item_list) - 1:
                 self.generate_icon()
             else:
                 self.generate_icon_in_history_forward()
@@ -69,7 +78,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if key == Qt.Key_Q:
             self.close()
         if key == Qt.Key_S:
-            pass
+            self.export_EPS()
 
         QMainWindow.keyPressEvent(self, event)
 
@@ -77,22 +86,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 if __name__ == "__main__":
 
-
-    #app = QApplication(sys.argv)
-
-    #grview = QGraphicsView()
-    #scene = QGraphicsScene()
-
-
-    #app = QApplication(sys.argv)
-    #main_window = MainWindow()
-
-    #scene.addPixmap(QPixmap('pic.jpg'))
-    #grview.setScene(scene)
-
-    #grview.show()
-
-    #sys.exit(app.exec_())
     import sys
     app = QApplication(sys.argv)
     main_window = MainWindow()

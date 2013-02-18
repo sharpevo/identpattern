@@ -149,6 +149,7 @@ class IdenticonRendererBase(object):
         #canvas.show()
         image.save("icon.png", "PNG")
         canvas.save("canvas.png", "PNG")
+        image.save("tmp.eps", "EPS")
         return image, canvas
 
     def drawPatch(self, pos, turn, invert, type, draw, size, foreColor, backColor):
