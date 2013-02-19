@@ -32,11 +32,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def update_view(self):
         self.make_label()
-        scene = QGraphicsScene()
-        scene.addPixmap(QPixmap("icon.png"))
-        self.gv_icon.setScene(scene)
-        scene.addPixmap(QPixmap("canvas.png"))
-        self.gv_canvas.setScene(scene)
+        scene_icon = QGraphicsScene()
+        scene_icon.addPixmap(QPixmap("icon.png"))
+        self.gv_icon.setScene(scene_icon)
+        scene_canvas = QGraphicsScene()
+        scene_canvas.addPixmap(QPixmap("canvas.png"))
+        self.gv_canvas.setScene(scene_canvas)
         #self.graphicsView.show()
         self.statusbar.clearMessage()
 

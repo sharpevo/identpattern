@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created: Sun Feb 17 19:39:31 2013
+# Created: Tue Feb 19 22:32:19 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -44,7 +44,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.gv_icon.sizePolicy().hasHeightForWidth())
         self.gv_icon.setSizePolicy(sizePolicy)
-        self.gv_icon.setMaximumSize(QtCore.QSize(72, 72))
+        self.gv_icon.setMaximumSize(QtCore.QSize(76, 76))
         self.gv_icon.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.gv_icon.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.gv_icon.setObjectName(_fromUtf8("gv_icon"))
