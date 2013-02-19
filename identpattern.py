@@ -1,5 +1,6 @@
 import time
 import shutil
+import os.path
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from ui_main import Ui_MainWindow
@@ -58,10 +59,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.generate_icon_by_code(self.history.get_item())
 
     def export_EPS(self):
-        output_folder = "/home/ryan/local/scripts/python/identpattern/EPS"
+        output_folder = "EPS"
         timestamp = time.strftime("%Y_%m_%d")
-        eps_file = "%s/%s-%s.eps" % (output_folder, timestamp, self.hashcode)
-        shutil.copyfile("tmp.eps", eps_file)
+        eps_file = "%s-%s.eps" % (timestamp, self.hashcode)
+        eps_path = os.path.join(output_folder, eps_file)
+        shutil.copyfile("tmp.eps", eps_path)
         self.statusbar.showMessage("Save EPS file to %s" % eps_file)
 
     def keyPressEvent(self, event):
