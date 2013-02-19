@@ -63,8 +63,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         timestamp = time.strftime("%Y_%m_%d")
         eps_file = "%s-%s.eps" % (timestamp, self.hashcode)
         eps_path = os.path.join(output_folder, eps_file)
-        shutil.copyfile("tmp.eps", eps_path)
+        shutil.copyfile("export.eps", eps_path)
         self.statusbar.showMessage("Save EPS file to %s" % eps_file)
+
+    def export_JPG(self):
+        output_folder = "JPG"
+        timestamp = time.strftime("%Y_%m_%d")
+        jpg_file = "%s-%s.jpg" % (timestamp, self.hashcode)
+        jpg_path = os.path.join(output_folder, jpg_file)
+        shutil.copyfile("export.jpg", jpg_path)
+        self.statusbar.showMessage("Save JPEG file to %s" % jpg_path)
+
 
     def keyPressEvent(self, event):
         key = event.key()
@@ -81,6 +90,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.close()
         if key == Qt.Key_S:
             self.export_EPS()
+        if key == Qt.Key_G:
+            self.export_JPG()
 
         QMainWindow.keyPressEvent(self, event)
 
