@@ -1,6 +1,7 @@
 import time
 import shutil
 import os.path
+import tempfile
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from ui_main import Ui_MainWindow
@@ -16,6 +17,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         #self.icon_count = 3
         self.history = CommandStack(MAX_HISTORY)
+        self.icon_path = os.path.join(tempfile.gettempdir(), "icon.png")
+        self.canvas_path = os.path.join(tempfile.gettempdir(), "canvas.png")
         self.generate_icon()
 
     def generate_icon(self):
@@ -33,12 +36,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def update_view(self):
         self.make_label()
         scene_icon = QGraphicsScene()
-        scene_icon.addPixmap(QPixmap("icon.png"))
+        scene_icon.addPixmap(QPixmap(self.icon_path))
         self.gv_icon.setScene(scene_icon)
         scene_canvas = QGraphicsScene()
-        scene_canvas.addPixmap(QPixmap("canvas.png"))
+        scene_canvas.addPixmap(QPixmap(self.canvas_path))
         self.gv_canvas.setScene(scene_canvas)
-        #self.graphicsView.show()
         self.statusbar.clearMessage()
 
     def make_label(self):
@@ -59,21 +61,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.history.move_cursor_forward()
         self.generate_icon_by_code(self.history.get_item())
 
-    def export_EPS(self):
-        output_folder = "EPS"
-        timestamp = time.strftime("%Y_%m_%d")
-        eps_file = "%s-%s.eps" % (timestamp, self.hashcode)
-        eps_path = os.path.join(output_folder, eps_file)
-        shutil.copyfile("export.eps", eps_path)
-        self.statusbar.showMessage("Save EPS file to %s" % eps_file)
+    def export_file(self, file_type="jpg"):
 
-    def export_JPG(self):
-        output_folder = "JPG"
+        if not os.path.exists(file_type):
+            os.mkdir(file_type)
+
         timestamp = time.strftime("%Y_%m_%d")
-        jpg_file = "%s-%s.jpg" % (timestamp, self.hashcode)
-        jpg_path = os.path.join(output_folder, jpg_file)
-        shutil.copyfile("export.jpg", jpg_path)
-        self.statusbar.showMessage("Save JPEG file to %s" % jpg_path)
+        dst_name = "%s-%s.%s" % (timestamp, self.hashcode, file_type)
+        dst_path = os.path.join(file_type, dst_name)
+        tmp_name = "export.%s" % file_type
+        tmp_path = os.path.join(tempfile.gettempdir(), tmp_name)
+
+        shutil.copyfile(tmp_path, dst_path)
+        self.statusbar.showMessage("Save %s file to %s" % (file_type, dst_path))
 
 
     def keyPressEvent(self, event):
@@ -90,9 +90,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if key == Qt.Key_Q:
             self.close()
         if key == Qt.Key_S:
-            self.export_EPS()
+            self.export_file("eps")
         if key == Qt.Key_G:
-            self.export_JPG()
+            self.export_file("jpg")
 
         QMainWindow.keyPressEvent(self, event)
 
