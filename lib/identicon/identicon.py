@@ -24,10 +24,17 @@ import Image
 import ImageDraw
 import ImagePath
 import ImageColor
+import tempfile
+import os.path
 
 __all__ = ['render_identicon', 'IdenticonRendererBase']
 
 
+ICON_PATH = os.path.join(tempfile.gettempdir(), "icon.png")
+CANVAS_PATH = os.path.join(tempfile.gettempdir(), "canvas.png")
+
+JPG_PATH = os.path.join(tempfile.gettempdir(), "export.jpg")
+EPS_PATH = os.path.join(tempfile.gettempdir(), "export.eps")
 class Matrix2D(list):
     """Matrix for Patch rotation"""
     def __init__(self, initial=[0.] * 9):
@@ -147,15 +154,16 @@ class IdenticonRendererBase(object):
                 canvas.paste(image, (i * item_size, j * item_size))
 
         #canvas.show()
-        image.save("icon.png", "PNG")
-        canvas.save("canvas.png", "PNG")
+
+        image.save(ICON_PATH, "PNG")
+        canvas.save(CANVAS_PATH, "PNG")
         draw = ImageDraw.Draw(canvas)
         draw.rectangle([0, 0, 72, 72], outline="black")
         draw.rectangle([1, 1, 71, 71], outline="white")
         draw.rectangle([2, 2, 70, 70], outline="black")
 
-        canvas.save("export.jpg", "JPEG")
-        canvas.save("export.eps", "EPS")
+        canvas.save(JPG_PATH, "JPEG")
+        canvas.save(EPS_PATH, "EPS")
         return image, canvas
 
     def drawPatch(self, pos, turn, invert, type, draw, size, foreColor, backColor):
