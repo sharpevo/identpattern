@@ -117,6 +117,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         QMainWindow.keyPressEvent(self, event)
 
+    def update_probar(self, val):
+        if self.probar.isHidden():
+            self.statusbar.showMessage("Loading collection...")
+            self.probar.show()
+        self.probar.setValue(val)
+
+    def finish_probar(self):
+        self.statusbar.clearMessage()
+        self.probar.hide()
+
 
 
 if __name__ == "__main__":
