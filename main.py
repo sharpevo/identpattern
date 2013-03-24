@@ -24,9 +24,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.load_collection(init=True)
         self.generate_icon()
 
-    def generate_icon(self, code=0, flag=False, update=True):
+    def generate_icon(self, code=0, hist=False, update=True):
         self.code = identicon.generate_icon(code)
-        if not code or flag: # add history only if code = 0
+        if not code or hist: # add history only if code = 0
             self.history.add_item(self.code)
         if update:
             self.update_view()
@@ -100,7 +100,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.probar.hide()
 
     def on_tb_collection_itemClicked(self):
-        self.generate_icon(code=self.parse_hashcode(str(self.tb_collection.currentItem().text())), flag=True)
+        self.generate_icon(code=self.parse_hashcode(str(self.tb_collection.currentItem().text())), hist=True)
 
 
     def keyPressEvent(self, event):
