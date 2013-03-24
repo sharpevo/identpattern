@@ -127,6 +127,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if key == Qt.Key_S:
             self.export_file("jpg")
 
+        if key == Qt.Key_Delete:
+            if self.tb_collection.currentItem():
+                self.generate_icon_in_history_backward()
+                file_path = os.path.join(os.getcwd(),"jpg",str(self.tb_collection.currentItem().text()))
+                os.remove(file_path)
+                self.load_collection()
+
         QMainWindow.keyPressEvent(self, event)
 
     def update_probar(self, val):
