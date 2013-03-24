@@ -24,13 +24,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.load_collection(init=True)
         self.generate_icon()
 
-    def generate_icon(self):
-        """generate icon and add hash code to history"""
-
-        self.generate_icon_by_code(0)
-        #self.history.add_item(self.hashcode)
-
-    def generate_icon_by_code(self, code, flag=False, update=True):
+    def generate_icon(self, code=0, flag=False, update=True):
         self.code = identicon.generate_icon(code)
         if not code or flag: # add history only if code = 0
             self.history.add_item(self.code)
@@ -59,11 +53,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def generate_icon_in_history_backward(self):
         self.history.move_cursor_backward()
-        self.generate_icon_by_code(self.history.get_item())
+        self.generate_icon(code=self.history.get_item())
 
     def generate_icon_in_history_forward(self):
         self.history.move_cursor_forward()
-        self.generate_icon_by_code(self.history.get_item())
+        self.generate_icon(code=self.history.get_item())
 
     def export_file(self, file_type="jpg"):
 
@@ -82,7 +76,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         old_code = self.code #since load_collection will change self.hashcode
         self.tb_collection.setCurrentCell(0,0)
         self.load_collection()
-        self.generate_icon_by_code(old_code)
+        self.generate_icon(code=old_code)
 
     def parse_hashcode(self, filename):
         return filename.rpartition("-")[2].partition(".")[0]
@@ -106,7 +100,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.probar.hide()
 
     def on_tb_collection_itemClicked(self):
-        self.generate_icon_by_code(self.parse_hashcode(str(self.tb_collection.currentItem().text())), flag=True)
+        self.generate_icon(code=self.parse_hashcode(str(self.tb_collection.currentItem().text())), flag=True)
 
 
     def keyPressEvent(self, event):
@@ -186,7 +180,7 @@ class Load_Collection(QThread):
             table_item = QTableWidgetItem(0)
             hash_code = self.main_window.parse_hashcode(item)
             #identicon.generate_icon(code)
-            self.main_window.generate_icon_by_code(hash_code, update=False)
+            self.main_window.generate_icon(code=hash_code, update=False)
             table_item.setIcon(QIcon(QPixmap(self.main_window.icon_path)))
             table_item.setText(item)
             self.main_window.tb_collection.setItem(i,0,table_item)
