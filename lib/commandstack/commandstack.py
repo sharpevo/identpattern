@@ -15,15 +15,15 @@ class CommandStack:
         If one can not cut, i.e. the cursor is in the end, for the full one, remove
         the first element, for the non-full one, append directly
         """
-        max_cursor = len(self.item_list) - 1
-        if self.cursor <= max_cursor:
-            self.item_list = self.item_list[:self.cursor + 1]
-        ## need to update length after cutting.
-        if len(self.item_list) == self.max_length:
-            self.item_list.pop(0)
+        if item in self.item_list:
+            self.cursor = self.item_list.index(item)
         else:
-            self.cursor += 1
-        self.item_list.append(item)
+            max_cursor = len(self.item_list) - 1
+            if len(self.item_list) == self.max_length:
+                self.item_list.pop(0)
+            else:
+                self.cursor += 1
+            self.item_list.append(item)
 
     def move_cursor_forward(self):
         """We have ensured the cursor will not grow over the max_length. """
