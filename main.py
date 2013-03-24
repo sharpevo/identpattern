@@ -24,11 +24,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.load_collection(init=True)
         self.generate_icon()
 
-    def generate_icon(self, code=0, hist=False, update=True):
+    def generate_icon(self, code=0, hist=False, ui=True):
         self.code = identicon.generate_icon(code)
         if not code or hist: # add history only if code = 0
             self.history.add_item(self.code)
-        if update:
+        if ui:
             self.update_view()
 
     def update_view(self):
@@ -177,7 +177,7 @@ class Load_Collection(QThread):
 
             table_item = QTableWidgetItem(0)
             hash_code = self.main_window.parse_hashcode(item)
-            self.main_window.generate_icon(code=hash_code, update=False)
+            self.main_window.generate_icon(code=hash_code, ui=False)
             table_item.setIcon(QIcon(QPixmap(self.main_window.icon_path)))
             table_item.setText(item)
             self.main_window.tb_collection.setItem(i,0,table_item)
