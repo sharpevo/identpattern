@@ -28,9 +28,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.code = identicon.generate_icon(code)
 
         if not code or hist: # add history only if code = 0
-            self.history.add_item(self.code)
+            self.update_hist()
         if ui:
             self.update_ui()
+
+    def update_hist(self):
+        self.history.add_item(self.code)
 
     def update_ui(self):
         self.make_label()
