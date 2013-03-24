@@ -78,6 +78,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         shutil.copyfile(tmp_path, dst_path)
         self.statusbar.showMessage("Save %s file to %s" % (file_type, dst_path))
 
+        old_hashcode = self.hashcode #since load_collection will change self.hashcode
+        self.tb_collection.setCurrentCell(0,0)
+        self.load_collection()
+        self.generate_icon_by_code(old_hashcode)
 
     def parse_hashcode(self, filename):
         return filename.rpartition("-")[2].partition(".")[0]
