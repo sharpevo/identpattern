@@ -77,12 +77,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         shutil.copyfile(tmp_path, dst_path)
         self.statusbar.showMessage("Save %s file to %s" % (file_type, dst_path))
 
-        old_code = self.code #since load_collection will change self.hashcode
+        old_code = self.code #since load_collection will change self.code
         self.tb_collection.setCurrentCell(0,0)
         self.load_collection()
         self.generate_icon(code=old_code)
 
-    def parse_hashcode(self, filename):
+    def parse_code(self, filename):
         return filename.rpartition("-")[2].partition(".")[0]
 
     def load_collection(self,init=False):
@@ -104,7 +104,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.probar.hide()
 
     def on_tb_collection_itemClicked(self):
-        self.generate_icon(code=self.parse_hashcode(str(self.tb_collection.currentItem().text())), hist=True)
+        self.generate_icon(code=self.parse_code(str(self.tb_collection.currentItem().text())), hist=True)
 
 
     def keyPressEvent(self, event):
@@ -180,7 +180,7 @@ class Load_Collection(QThread):
             self.partDone.emit(i*100/count)
 
             table_item = QTableWidgetItem(0)
-            hash_code = self.main_window.parse_hashcode(item)
+            hash_code = self.main_window.parse_code(item)
             self.main_window.generate_icon(code=hash_code, ui=False)
             table_item.setIcon(QIcon(QPixmap(self.main_window.icon_path)))
             table_item.setText(item)
