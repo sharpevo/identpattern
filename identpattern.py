@@ -30,11 +30,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.generate_icon_by_code(0)
         #self.history.add_item(self.hashcode)
 
-    def generate_icon_by_code(self, code):
+    def generate_icon_by_code(self, code, flag=False, update=True):
         self.hashcode = identicon.generate_icon(code)
-        if not code:
+        if not code or flag: # add history only if code = 0
             self.history.add_item(self.hashcode)
-        self.update_view()
+        if update:
+            self.update_view()
 
     def update_view(self):
         self.make_label()
