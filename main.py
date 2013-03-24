@@ -165,6 +165,10 @@ class Load_Collection(QThread):
 
     def process(self):
 
+        collection_folder = "jpg"
+        if not os.path.exists(collection_folder):
+            os.mkdir(collection_folder)
+
         self.main_window.setEnabled(False)
         collection_path = os.path.join(os.getcwd(), "jpg")
         file_list = sorted(os.listdir(collection_path),
