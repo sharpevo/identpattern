@@ -105,6 +105,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lb_probar.hide()
         self.probar.hide()
 
+    def on_tb_collection_itemClicked(self):
+        self.generate_icon_by_code(self.parse_hashcode(str(self.tb_collection.currentItem().text())), flag=True)
+
 
     def keyPressEvent(self, event):
         key = event.key()
