@@ -26,12 +26,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def generate_icon(self, code=0, hist=False, ui=True):
         self.code = identicon.generate_icon(code)
+
         if not code or hist: # add history only if code = 0
             self.history.add_item(self.code)
         if ui:
-            self.update_view()
+            self.update_ui()
 
-    def update_view(self):
+    def update_ui(self):
         self.make_label()
         scene_icon = QGraphicsScene()
         scene_icon.addPixmap(QPixmap(self.icon_path))
