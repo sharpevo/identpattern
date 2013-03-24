@@ -170,7 +170,7 @@ class Load_Collection(QThread):
             os.mkdir(collection_folder)
 
         self.main_window.setEnabled(False)
-        collection_path = os.path.join(os.getcwd(), "jpg")
+        collection_path = os.path.join(os.getcwd(), collection_folder)
         file_list = sorted(os.listdir(collection_path),
                 key=lambda f: os.path.getmtime(os.path.join(collection_path,f)),
                 reverse=True)
