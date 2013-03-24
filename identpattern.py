@@ -1,6 +1,6 @@
 import time
 import shutil
-import os.path
+import os
 import tempfile
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
@@ -127,6 +127,49 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.statusbar.clearMessage()
         self.probar.hide()
 
+class Load_Collection(QThread):
+    partDone = pyqtSignal(int)
+    procDone = pyqtSignal(bool)
+
+    def __init__(self,main_window, parent=None):
+        super(Load_Collection, self).__init__(parent)
+        self.stopped = False
+        self.completed = False
+        self.main_window = main_window
+
+    def stop(self):
+        self.stopped = False
+
+    def run(self):
+        self.process()
+        self.stop()
+
+    def process(self):
+
+        self.main_window.setEnabled(False)
+        collection_path = os.path.join(os.getcwd(), "jpg")
+        file_list = sorted(os.listdir(collection_path),
+                key=lambda f: os.path.getmtime(os.path.join(collection_path,f)),
+                reverse=True)
+
+        hash_list = []
+        count = len(file_list)
+        self.main_window.tb_collection.setRowCount(count)
+        self.main_window.tb_collection.clear()
+        for i,item in enumerate(file_list):
+            #time.sleep(1)
+            self.partDone.emit(i*100/count)
+
+            table_item = QTableWidgetItem(0)
+            hash_code = self.main_window.parse_hashcode(item)
+            #identicon.generate_icon(code)
+            self.main_window.generate_icon_by_code(hash_code, update=False)
+            table_item.setIcon(QIcon(QPixmap(self.main_window.icon_path)))
+            table_item.setText(item)
+            self.main_window.tb_collection.setItem(i,0,table_item)
+
+        self.procDone.emit(True)
+        self.main_window.setEnabled(True)
 
 
 if __name__ == "__main__":
