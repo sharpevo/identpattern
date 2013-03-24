@@ -114,9 +114,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.generate_icon_in_history_backward()
         if key == Qt.Key_Q:
             self.close()
-        if key == Qt.Key_S:
+        if key == Qt.Key_E:
             self.export_file("eps")
-        if key == Qt.Key_G:
+        if key == Qt.Key_S:
             self.export_file("jpg")
 
         QMainWindow.keyPressEvent(self, event)
