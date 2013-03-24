@@ -31,9 +31,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.history.add_item(self.hashcode)
 
     def generate_icon_by_code(self, code, flag=False, update=True):
-        self.hashcode = identicon.generate_icon(code)
+        self.code = identicon.generate_icon(code)
         if not code or flag: # add history only if code = 0
-            self.history.add_item(self.hashcode)
+            self.history.add_item(self.code)
         if update:
             self.update_view()
 
@@ -50,8 +50,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def make_label(self):
         label_list = []
         for item in self.history.item_list:
-            if self.hashcode == item:
-                item = "<font color='blue'>%s</font>" % self.hashcode
+            if self.code == item:
+                item = "<font color='blue'>%s</font>" % self.code
             else:
                 item = str(item)
             label_list.append(item)
@@ -71,7 +71,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             os.mkdir(file_type)
 
         timestamp = time.strftime("%Y_%m_%d")
-        dst_name = "%s-%s.%s" % (timestamp, self.hashcode, file_type)
+        dst_name = "%s-%s.%s" % (timestamp, self.code, file_type)
         dst_path = os.path.join(file_type, dst_name)
         tmp_name = "export.%s" % file_type
         tmp_path = os.path.join(tempfile.gettempdir(), tmp_name)
@@ -79,10 +79,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         shutil.copyfile(tmp_path, dst_path)
         self.statusbar.showMessage("Save %s file to %s" % (file_type, dst_path))
 
-        old_hashcode = self.hashcode #since load_collection will change self.hashcode
+        old_code = self.code #since load_collection will change self.hashcode
         self.tb_collection.setCurrentCell(0,0)
         self.load_collection()
-        self.generate_icon_by_code(old_hashcode)
+        self.generate_icon_by_code(old_code)
 
     def parse_hashcode(self, filename):
         return filename.rpartition("-")[2].partition(".")[0]
