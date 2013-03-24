@@ -104,7 +104,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.probar.hide()
 
     def on_tb_collection_itemClicked(self):
-        self.generate_icon(code=self.parse_code(str(self.tb_collection.currentItem().text())), hist=True)
+        self.generate_icon(
+                code=self.parse_code(str(self.tb_collection.currentItem().text())),
+                hist=True)
 
 
     def keyPressEvent(self, event):
@@ -127,7 +129,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if key == Qt.Key_Delete:
             if self.tb_collection.currentItem():
                 self.generate_icon_in_history_backward()
-                file_path = os.path.join(os.getcwd(),"jpg",str(self.tb_collection.currentItem().text()))
+                file_path = os.path.join(
+                        os.getcwd(),
+                        "jpg",
+                        str(self.tb_collection.currentItem().text()))
                 os.remove(file_path)
                 self.load_collection()
 
