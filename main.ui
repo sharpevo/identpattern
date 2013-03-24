@@ -51,7 +51,7 @@
       <item>
        <widget class="QLabel" name="lb_icon">
         <property name="text">
-         <string>TextLabel</string>
+         <string>Loading...</string>
         </property>
        </widget>
       </item>

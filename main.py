@@ -24,20 +24,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.load_collection(init=True)
         self.generate_icon()
 
-    def generate_icon(self):
-        """generate icon and add hash code to history"""
+    def generate_icon(self, code=0, hist=False, ui=True):
+        self.code = identicon.generate_icon(code)
 
-        self.generate_icon_by_code(0)
-        #self.history.add_item(self.hashcode)
+        if not code or hist: # add history only if code = 0
+            self.update_hist()
+        if ui:
+            self.update_ui()
 
-    def generate_icon_by_code(self, code, flag=False, update=True):
-        self.hashcode = identicon.generate_icon(code)
-        if not code or flag: # add history only if code = 0
-            self.history.add_item(self.hashcode)
-        if update:
-            self.update_view()
+    def update_hist(self):
+        self.history.add_item(self.code)
 
-    def update_view(self):
+    def update_ui(self):
         self.make_label()
         scene_icon = QGraphicsScene()
         scene_icon.addPixmap(QPixmap(self.icon_path))
@@ -50,20 +48,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def make_label(self):
         label_list = []
         for item in self.history.item_list:
-            if self.hashcode == item:
-                item = "<font color='blue'>%s</font>" % self.hashcode
+            if self.code == item:
+                item = "<font color='blue'>%s</font>" % self.code
             else:
                 item = str(item)
             label_list.append(item)
+        count = MAX_HISTORY - len(label_list)
+        label_list.append("<br/>" * count)
         self.lb_icon.setText("<br/>".join(label_list))
 
     def generate_icon_in_history_backward(self):
         self.history.move_cursor_backward()
-        self.generate_icon_by_code(self.history.get_item())
+        self.generate_icon(code=self.history.get_item())
 
     def generate_icon_in_history_forward(self):
         self.history.move_cursor_forward()
-        self.generate_icon_by_code(self.history.get_item())
+        self.generate_icon(code=self.history.get_item())
 
     def export_file(self, file_type="jpg"):
 
@@ -71,7 +71,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             os.mkdir(file_type)
 
         timestamp = time.strftime("%Y_%m_%d")
-        dst_name = "%s-%s.%s" % (timestamp, self.hashcode, file_type)
+        dst_name = "%s-%s.%s" % (timestamp, self.code, file_type)
         dst_path = os.path.join(file_type, dst_name)
         tmp_name = "export.%s" % file_type
         tmp_path = os.path.join(tempfile.gettempdir(), tmp_name)
@@ -79,12 +79,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         shutil.copyfile(tmp_path, dst_path)
         self.statusbar.showMessage("Save %s file to %s" % (file_type, dst_path))
 
-        old_hashcode = self.hashcode #since load_collection will change self.hashcode
+        old_code = self.code #since load_collection will change self.code
         self.tb_collection.setCurrentCell(0,0)
         self.load_collection()
-        self.generate_icon_by_code(old_hashcode)
+        self.generate_icon(code=old_code)
 
-    def parse_hashcode(self, filename):
+    def parse_code(self, filename):
         return filename.rpartition("-")[2].partition(".")[0]
 
     def load_collection(self,init=False):
@@ -106,14 +106,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.probar.hide()
 
     def on_tb_collection_itemClicked(self):
-        self.generate_icon_by_code(self.parse_hashcode(str(self.tb_collection.currentItem().text())), flag=True)
+        self.generate_icon(
+                code=self.parse_code(str(self.tb_collection.currentItem().text())),
+                hist=True)
 
 
     def keyPressEvent(self, event):
         key = event.key()
 
         if key == Qt.Key_J:
-            #print self.history.cursor, len(self.history.item_list) - 1
             if self.history.cursor >= len(self.history.item_list) - 1:
                 self.generate_icon()
             else:
@@ -130,7 +131,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if key == Qt.Key_Delete:
             if self.tb_collection.currentItem():
                 self.generate_icon_in_history_backward()
-                file_path = os.path.join(os.getcwd(),"jpg",str(self.tb_collection.currentItem().text()))
+                file_path = os.path.join(
+                        os.getcwd(),
+                        "jpg",
+                        str(self.tb_collection.currentItem().text()))
                 os.remove(file_path)
                 self.load_collection()
 
@@ -180,13 +184,11 @@ class Load_Collection(QThread):
         self.main_window.tb_collection.setRowCount(count)
         self.main_window.tb_collection.clear()
         for i,item in enumerate(file_list):
-            #time.sleep(1)
             self.partDone.emit(i*100/count)
 
             table_item = QTableWidgetItem(0)
-            hash_code = self.main_window.parse_hashcode(item)
-            #identicon.generate_icon(code)
-            self.main_window.generate_icon_by_code(hash_code, update=False)
+            hash_code = self.main_window.parse_code(item)
+            self.main_window.generate_icon(code=hash_code, ui=False)
             table_item.setIcon(QIcon(QPixmap(self.main_window.icon_path)))
             table_item.setText(item)
             self.main_window.tb_collection.setItem(i,0,table_item)
