@@ -107,7 +107,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         key = event.key()
 
         if key == Qt.Key_J:
-            #print self.history.cursor, len(self.history.item_list) - 1
             if self.history.cursor >= len(self.history.item_list) - 1:
                 self.generate_icon()
             else:
@@ -174,12 +173,10 @@ class Load_Collection(QThread):
         self.main_window.tb_collection.setRowCount(count)
         self.main_window.tb_collection.clear()
         for i,item in enumerate(file_list):
-            #time.sleep(1)
             self.partDone.emit(i*100/count)
 
             table_item = QTableWidgetItem(0)
             hash_code = self.main_window.parse_hashcode(item)
-            #identicon.generate_icon(code)
             self.main_window.generate_icon(code=hash_code, update=False)
             table_item.setIcon(QIcon(QPixmap(self.main_window.icon_path)))
             table_item.setText(item)
