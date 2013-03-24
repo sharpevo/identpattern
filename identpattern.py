@@ -15,10 +15,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         QMainWindow.__init__(self, parent)
         self.setupUi(self)
-        #self.icon_count = 3
+        self.probar.hide()
+
         self.history = CommandStack(MAX_HISTORY)
         self.icon_path = os.path.join(tempfile.gettempdir(), "icon.png")
         self.canvas_path = os.path.join(tempfile.gettempdir(), "canvas.png")
+        self.tb_collection.setColumnCount(1)
+        self.load_collection(init=True)
         self.generate_icon()
 
     def generate_icon(self):
@@ -74,6 +77,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         shutil.copyfile(tmp_path, dst_path)
         self.statusbar.showMessage("Save %s file to %s" % (file_type, dst_path))
+
+    def load_collection(self,init=False):
+
+        if init:
+            self.show()
+        self.thread = Load_Collection(self)
+        self.thread.partDone.connect(self.update_probar)
+        self.thread.procDone.connect(self.finish_probar)
+        self.thread.run()
+
+    def update_bar(self,val):
+        if self.probar.isHidden():
+            self.probar.show()
+        self.probar.setValue(val)
+
+    def finish_bar(self):
+        self.lb_probar.hide()
+        self.probar.hide()
 
 
     def keyPressEvent(self, event):
