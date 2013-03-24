@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created: Sun Mar 24 15:56:24 2013
+# Created: Sun Mar 24 22:45:35 2013
 #      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
@@ -106,6 +106,6 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
-        self.lb_icon.setText(_translate("MainWindow", "TextLabel", None))
+        self.lb_icon.setText(_translate("MainWindow", "Loading...", None))
         self.probar.setFormat(_translate("MainWindow", "%p%", None))
 
