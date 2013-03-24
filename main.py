@@ -55,6 +55,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             else:
                 item = str(item)
             label_list.append(item)
+        count = MAX_HISTORY - len(label_list)
+        label_list.append("<br/>" * count)
         self.lb_icon.setText("<br/>".join(label_list))
 
     def generate_icon_in_history_backward(self):
