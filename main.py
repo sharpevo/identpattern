@@ -15,12 +15,21 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
 
         QMainWindow.__init__(self, parent)
         #self.setupUi(self)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint)
+        desktop = QApplication.desktop()
+        screen_size = desktop.availableGeometry()
+        self.screen_height = screen_size.height()
 
-        self.scene_canvas = QGraphicsScene()
+        self.scene_canvas = QGraphicsScene(-screen_size.width()/2,
+                -screen_size.height()/2,
+                screen_size.width(),
+                screen_size.height())
+        self.setScene(self.scene_canvas)
 
-        gradient = QRadialGradient(0,0, 600, 0,0)
+        gradient = QRadialGradient(0,0, screen_size.width()/2, 0,0)
         gradient.setColorAt(0, QColor("#00aaaa"))
         gradient.setColorAt(1, QColor("#eeeeee"))
         self.setBackgroundBrush(QBrush(gradient))
@@ -42,8 +51,6 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
 
     def update_ui(self):
         self.pix = QPixmap(self.icon_path)
-        self.scene_canvas.clear()
-        self.scene_canvas.addPixmap(self.pix)
         self.animation()
 
     def animation(self):
@@ -51,22 +58,20 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         OutElastic: Quick tiled;
         InOutElastic: centered then tiled;"""
 
-        mode = 12
+        self.scene_canvas.clear()
+
+        mode = self.screen_height//self.pix.height()+1
+
+
+        #mode = 8
         count = mode * mode
 
-        scene = QGraphicsScene(-350, -350, 700, 700)
-        items = []
+        self.group = QParallelAnimationGroup()
         for i in range(count):
             item = Pixmap(self.pix)
             item.pixmap_item.setOffset(-self.pix.width() / 2, -self.pix.height() / 2)
             item.pixmap_item.setZValue(i)
-            items.append(item)
-            scene.addItem(item.pixmap_item)
-
-        self.setScene(scene)
-
-        self.group = QParallelAnimationGroup()
-        for i, item in enumerate(items):
+            self.scene_canvas.addItem(item.pixmap_item)
             anim = QPropertyAnimation(item, "pos")
             anim.setStartValue(QPointF(-self.pix.width()/2, -self.pix.height()/2))
             anim.setEndValue(QPointF(((i%mode)-mode/2)*self.pix.width() + self.pix.width()/2,
@@ -76,6 +81,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
             anim.setEasingCurve(QEasingCurve.InOutElastic)
             self.group.addAnimation(anim)
         self.group.start()
+        self.scene_canvas.items()[0].pixmap().save("test.jpg")
 
     def generate_icon_in_history_backward(self):
         self.history.move_cursor_backward()
@@ -141,6 +147,7 @@ class Pixmap(QObject):
         super(Pixmap, self).__init__()
 
         self.pixmap_item = QGraphicsPixmapItem(pix)
+        self.pixmap_item.setOpacity(0.7)
         self.pixmap_item.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
 
     def _set_pos(self, pos):
