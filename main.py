@@ -17,16 +17,23 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         #self.setupUi(self)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.DragMode(QGraphicsView.RubberBandDrag)
+        self.setAcceptDrops(True)
 
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint)
         desktop = QApplication.desktop()
         screen_size = desktop.availableGeometry()
         self.screen_height = screen_size.height()
 
-        self.scene_canvas = QGraphicsScene(-screen_size.width()/2,
-                -screen_size.height()/2,
-                screen_size.width(),
-                screen_size.height())
+        #self.scene_canvas = QGraphicsScene(-screen_size.width()/2,
+                #-screen_size.height()/2,
+                #screen_size.width(),
+                #screen_size.height())
+        self.scene_canvas = QGraphicsScene(-self.screen_height/2,
+                -self.screen_height/2,
+                self.screen_height,
+                self.screen_height)
+        self.animation_group = QParallelAnimationGroup()
         self.setScene(self.scene_canvas)
 
         gradient = QRadialGradient(0,0, screen_size.width()/2, 0,0)
@@ -58,19 +65,23 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         OutElastic: Quick tiled;
         InOutElastic: centered then tiled;"""
 
-        self.scene_canvas.clear()
+        self.animation_group.clear()
 
         mode = self.screen_height//self.pix.height()+1
 
-
-        #mode = 8
         count = mode * mode
 
-        self.group = QParallelAnimationGroup()
+        remove = False
+        if len(self.scene_canvas.items()) >= count:
+            remove = True
+        items = self.scene_canvas.items()[-count:]
         for i in range(count):
             item = Pixmap(self.pix)
-            item.pixmap_item.setOffset(-self.pix.width() / 2, -self.pix.height() / 2)
+            if remove:
+                self.scene_canvas.removeItem(items[count-1-i])
             item.pixmap_item.setZValue(i)
+            item.pixmap_item.set_movable(True)
+            #item.pixmap_item.set_code(self.code)
             self.scene_canvas.addItem(item.pixmap_item)
             anim = QPropertyAnimation(item, "pos")
             anim.setStartValue(QPointF(-self.pix.width()/2, -self.pix.height()/2))
@@ -78,10 +89,10 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
                     ((i//mode)-mode/2)*self.pix.height() + self.pix.height()/2))
             #anim.setDuration(550+i*25)
             anim.setDuration(1800)
-            anim.setEasingCurve(QEasingCurve.InOutElastic)
-            self.group.addAnimation(anim)
-        self.group.start()
-        self.scene_canvas.items()[0].pixmap().save("test.jpg")
+            anim.setEasingCurve(QEasingCurve.OutElastic)
+            self.animation_group.addAnimation(anim)
+        self.animation_group.start()
+        #self.scene_canvas.items()[0].pixmap().save("test.jpg")
 
     def generate_icon_in_history_backward(self):
         self.history.move_cursor_backward()
@@ -110,6 +121,12 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         self.load_collection()
         self.generate_icon(code=old_code)
 
+    #def save_scene(self):
+        #items = self.scene_canvas.items()[:count]
+        #with open("test.txt") as f:
+            #for item in items:
+                #f.write(item.code())
+
     def keyPressEvent(self, event):
         key = event.key()
 
@@ -125,7 +142,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         if key == Qt.Key_E:
             self.export_file("eps")
         if key == Qt.Key_S:
-            self.export_file("jpg")
+            self.save_scene()
         if key == Qt.Key_R:
             self.animation()
 
@@ -141,37 +158,152 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
 
         QMainWindow.keyPressEvent(self, event)
 
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat("application/icondata"):
+            if event.source() == self:
+                event.setDropAction(Qt.MoveAction)
+                event.accept()
+            else:
+                event.ignore()
+
+    dragMoveEvent = dragEnterEvent
+
+    def dropEvent(self, event):
+        if event.mimeData().hasFormat('application/icondata'):
+            itemData = event.mimeData().data('application/icondata')
+            dataStream = QDataStream(itemData, QIODevice.ReadOnly)
+
+            pixmap = QPixmap()
+            offset = QPoint()
+            dataStream >> pixmap >> offset
+
+            new_item = Pixmap(pixmap)
+            scene_pos = self.mapToScene(event.pos())
+            new_item.pixmap_item.moveBy(scene_pos.x()-self.offset.x(), scene_pos.y()-self.offset.y())
+            new_item.pixmap_item.get_original_pixmap()
+            new_item.pixmap_item.setZValue(len(self.scene_canvas.items())+1)
+            #new_item.pixmap_item.set_code(itemData.text())
+            self.scene_canvas.addItem(new_item.pixmap_item)
+
+            if event.source() == self:
+                event.setDropAction(Qt.MoveAction)
+                event.accept()
+            else:
+                event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def mousePressEvent(self, event):
+        if event.button() != Qt.LeftButton:
+            event.ignore()
+            return
+
+        item = self.itemAt(event.pos())
+        if not item:
+            return
+
+        item.get_original_pixmap()
+        pixmap = QPixmap(item.pixmap())
+
+        itemData = QByteArray()
+        dataStream = QDataStream(itemData, QIODevice.WriteOnly)
+        dataStream << pixmap << (event.pos() - item.pos()).toPoint()
+
+        mimeData = QMimeData()
+        mimeData.setData('application/icondata', itemData)
+        #mimeData.setText(item.code())
+
+        drag = QDrag(self)
+        drag.setMimeData(mimeData)
+        drag.setPixmap(pixmap)
+        self.offset = event.pos() - self.mapFromScene(item.pos())
+        drag.setHotSpot(self.offset)
+
+        if drag.exec_(Qt.CopyAction | Qt.MoveAction, Qt.CopyAction) == Qt.MoveAction:
+            if not item.movable:
+                self.scene_canvas.removeItem(item)
+            item.show()
+        else:
+            item.show()
+            item.setPixmap(pixmap)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() != Qt.LeftButton:
+            event.ignore()
+            return
+        else:
+            pass
+    def mouseDoubleClickEvent(self, event):
+        item = self.itemAt(event.pos())
+        if not item:
+            return
+
+        self.pix = QPixmap(item.original_pixmap)
+        self.animation()
+
 class Pixmap(QObject):
 
     def __init__(self, pix):
         super(Pixmap, self).__init__()
 
-        self.pixmap_item = QGraphicsPixmapItem(pix)
+        self.pixmap_item = GraphicsPixmapItem(pix)
         self.pixmap_item.setOpacity(0.7)
         self.pixmap_item.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
-
+        self.pixmap_item.setAcceptsHoverEvents(True)
+        #self.pixmap_item.GraphicsItemFlag(QGraphicsItem.ItemIsMovable)
     def _set_pos(self, pos):
         self.pixmap_item.setPos(pos)
 
     pos = pyqtProperty(QPointF, fset=_set_pos)
 
-class Play_Anim(QThread):
+class GraphicsPixmapItem(QGraphicsPixmapItem):
 
-    def __init__(self,main_window, parent=None):
-        super(Play_Anim, self).__init__(parent)
-        self.stopped = False
-        self.completed = False
-        self.main_window = main_window
+    def __init__(self, pixmap):
+        super(GraphicsPixmapItem, self).__init__()
+        self.original_pixmap = pixmap
+        self.setPixmap(pixmap)
+        self.setCursor(Qt.OpenHandCursor)
+        self.movable=False
 
-    def stop(self):
-        self.stopped = False
+    def get_movable(self):
+        return self.movable
 
-    def run(self):
-        self.process()
-        self.stop()
+    def set_movable(self, movable):
+        self.movable = movable
 
-    def process(self):
-        self.main_window.anim.emit()
+    def hoverEnterEvent(self, event):
+        tempPixmap = QPixmap(self.pixmap())
+        painter = QPainter()
+        painter.begin(tempPixmap)
+        painter.fillRect(self.pixmap().rect(), QColor(127, 127, 127, 127))
+        painter.end()
+
+        self.setPixmap(tempPixmap)
+
+    def hoverLeaveEvent(self, event):
+        self.get_original_pixmap()
+
+    def get_original_pixmap(self):
+        self.setPixmap(self.original_pixmap)
+
+    #def set_code(self, code):
+        #self._code = code
+
+    #def code(self):
+        #return self._code
+
+    def mousePressEvent(self, event):
+        if event.button() != QtCore.Qt.LeftButton:
+            event.ignore()
+            return
+        self.setCursor(Qt.ClosedHandCursor)
+
+    def mouseMoveEvent(self, event):
+        self.setCursor(Qt.ClosedHandCursor)
+
+    def mouseReleaseEvent(self, event):
+        self.setCursor(Qt.OpenHandCursor)
+
 
 if __name__ == "__main__":
 
