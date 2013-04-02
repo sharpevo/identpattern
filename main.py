@@ -25,14 +25,14 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         screen_size = desktop.availableGeometry()
         self.screen_height = screen_size.height()
 
-        #self.scene_canvas = QGraphicsScene(-screen_size.width()/2,
-                #-screen_size.height()/2,
-                #screen_size.width(),
-                #screen_size.height())
-        self.scene_canvas = QGraphicsScene(-self.screen_height/2,
-                -self.screen_height/2,
-                self.screen_height,
-                self.screen_height)
+        self.scene_canvas = QGraphicsScene(-screen_size.width()/2,
+                -screen_size.height()/2,
+                screen_size.width(),
+                screen_size.height())
+        #self.scene_canvas = QGraphicsScene(-self.screen_height/2,
+                #-self.screen_height/2,
+                #self.screen_height,
+                #self.screen_height)
         self.animation_group = QParallelAnimationGroup()
         self.setScene(self.scene_canvas)
 
@@ -43,6 +43,8 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         self.history = CommandStack(MAX_HISTORY)
         self.icon_path = os.path.join(tempfile.gettempdir(), "icon.png")
         self.generate_icon()
+
+        self.load_scene()
 
 
     def generate_icon(self, code=0, hist=False, ui=True):
@@ -70,6 +72,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         mode = self.screen_height//self.pix.height()+1
 
         count = mode * mode
+        self.item_number = count
 
         remove = False
         if len(self.scene_canvas.items()) >= count:
@@ -81,7 +84,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
                 self.scene_canvas.removeItem(items[count-1-i])
             item.pixmap_item.setZValue(i)
             item.pixmap_item.set_movable(True)
-            #item.pixmap_item.set_code(self.code)
+            item.pixmap_item.set_code(self.code)
             self.scene_canvas.addItem(item.pixmap_item)
             anim = QPropertyAnimation(item, "pos")
             anim.setStartValue(QPointF(-self.pix.width()/2, -self.pix.height()/2))
@@ -121,11 +124,30 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         self.load_collection()
         self.generate_icon(code=old_code)
 
-    #def save_scene(self):
-        #items = self.scene_canvas.items()[:count]
-        #with open("test.txt") as f:
-            #for item in items:
-                #f.write(item.code())
+
+    def load_scene(self):
+        with open("test.txt", "r") as f:
+            for line in f.readlines():
+                code, x, y = line.split(":")
+                self.generate_icon(code, ui=False)
+                pixmap = QPixmap(self.icon_path)
+                item = GraphicsPixmapItem(pixmap)
+                item.moveBy(float(x), float(y))
+                item.setZValue(len(self.scene_canvas.items())+1)
+                item.set_code(code)
+                self.scene_canvas.addItem(item)
+
+
+    def save_scene(self):
+        count = self.item_number
+        items = self.scene_canvas.items()[:-count]
+        print items[0].code()
+        with open("test.txt","w+") as f:
+            f.writelines(["%s:%s:%s%s" % (item.code(),
+                                        item.pos().x(),
+                                        item.pos().y(),
+                                        os.linesep)
+                                        for item in items])
 
     def keyPressEvent(self, event):
         key = event.key()
@@ -182,8 +204,9 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
             new_item.pixmap_item.moveBy(scene_pos.x()-self.offset.x(), scene_pos.y()-self.offset.y())
             new_item.pixmap_item.get_original_pixmap()
             new_item.pixmap_item.setZValue(len(self.scene_canvas.items())+1)
-            #new_item.pixmap_item.set_code(itemData.text())
+            new_item.pixmap_item.set_code(event.mimeData().text())
             self.scene_canvas.addItem(new_item.pixmap_item)
+
 
             if event.source() == self:
                 event.setDropAction(Qt.MoveAction)
@@ -211,7 +234,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
 
         mimeData = QMimeData()
         mimeData.setData('application/icondata', itemData)
-        #mimeData.setText(item.code())
+        mimeData.setText(item.code())
 
         drag = QDrag(self)
         drag.setMimeData(mimeData)
@@ -286,11 +309,11 @@ class GraphicsPixmapItem(QGraphicsPixmapItem):
     def get_original_pixmap(self):
         self.setPixmap(self.original_pixmap)
 
-    #def set_code(self, code):
-        #self._code = code
+    def set_code(self, code):
+        self._code = code
 
-    #def code(self):
-        #return self._code
+    def code(self):
+        return str(self._code)
 
     def mousePressEvent(self, event):
         if event.button() != QtCore.Qt.LeftButton:
