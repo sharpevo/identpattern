@@ -15,9 +15,10 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
 
         QMainWindow.__init__(self, parent)
         #self.setupUi(self)
+        #self.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.DragMode(QGraphicsView.RubberBandDrag)
+        #self.DragMode(QGraphicsView.ScrollHandDrag)
         self.setAcceptDrops(True)
 
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint)
@@ -25,10 +26,11 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         screen_size = desktop.availableGeometry()
         self.screen_height = screen_size.height()
 
-        self.scene_canvas = QGraphicsScene(-screen_size.width()/2,
-                -screen_size.height()/2,
-                screen_size.width(),
-                screen_size.height())
+        self.scene_canvas = QGraphicsScene()#-640, -400, 1280, 800)
+        #self.scene_canvas = QGraphicsScene(-screen_size.width()/2,
+                #-screen_size.height()/2,
+                #screen_size.width(),
+                #screen_size.height())
         #self.scene_canvas = QGraphicsScene(-self.screen_height/2,
                 #-self.screen_height/2,
                 #self.screen_height,
@@ -46,6 +48,15 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
 
         self.load_scene()
 
+        self.setGeometry(QRect(0, 0, screen_size.width(), screen_size.height()))
+        self.setSceneRect(-screen_size.width()/2+self.pix.width(),
+                -screen_size.height()/2+self.pix.height(),
+                screen_size.width(),
+                screen_size.height())
+
+
+        self.animator=QTimer()
+        self.animator.timeout.connect(self.generate_icon)
 
     def generate_icon(self, code=0, hist=False, ui=True):
         self.code = identicon.generate_icon(code)
@@ -69,7 +80,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
 
         self.animation_group.clear()
 
-        mode = self.screen_height//self.pix.height()+1
+        mode = self.screen_height//self.pix.height()
 
         count = mode * mode
         self.item_number = count
@@ -90,12 +101,19 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
             anim.setStartValue(QPointF(-self.pix.width()/2, -self.pix.height()/2))
             anim.setEndValue(QPointF(((i%mode)-mode/2)*self.pix.width() + self.pix.width()/2,
                     ((i//mode)-mode/2)*self.pix.height() + self.pix.height()/2))
-            #anim.setDuration(550+i*25)
-            anim.setDuration(1800)
-            anim.setEasingCurve(QEasingCurve.OutElastic)
+            anim.setDuration(350+i*25)
+            #anim.setDuration(1500)
+            anim.setEasingCurve(QEasingCurve.OutBack)
             self.animation_group.addAnimation(anim)
         self.animation_group.start()
         #self.scene_canvas.items()[0].pixmap().save("test.jpg")
+
+    def play(self):
+        if self.animator.isActive():
+            self.animator.stop()
+        else:
+            self.animator.start(3000)
+        self.generate_icon()
 
     def generate_icon_in_history_backward(self):
         self.history.move_cursor_backward()
@@ -117,13 +135,21 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         tmp_path = os.path.join(tempfile.gettempdir(), tmp_name)
 
         shutil.copyfile(tmp_path, dst_path)
-        self.statusbar.showMessage("Save %s file to %s" % (file_type, dst_path))
 
-        old_code = self.code #since load_collection will change self.code
-        self.tb_collection.setCurrentCell(0,0)
-        self.load_collection()
-        self.generate_icon(code=old_code)
+    def export_icon(self):
+        file_type = "jpg"
+        if not os.path.exists(file_type):
+            os.mkdir(file_type)
 
+        item = self.scene_canvas.items()[self.item_number]
+        timestamp = time.strftime("%Y_%m_%d")
+        dst_name = "%s-%s.%s" % (timestamp, item.code(), file_type)
+        dst_path = os.path.join(file_type, dst_name)
+        item.pixmap().save(dst_path)
+        cwd = os.path.join(os.getcwd(), file_type)
+        text = QGraphicsTextItem("File '%s' has been saved in '%s'" % (dst_path, cwd))
+        #text.setPos(-100, -100)
+        #self.scene_canvas.addItem(text)
 
     def load_scene(self):
         with open("test.txt", "r") as f:
@@ -141,7 +167,6 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
     def save_scene(self):
         count = self.item_number
         items = self.scene_canvas.items()[:-count]
-        print items[0].code()
         with open("test.txt","w+") as f:
             f.writelines(["%s:%s:%s%s" % (item.code(),
                                         item.pos().x(),
@@ -160,23 +185,13 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         if key == Qt.Key_K:
             self.generate_icon_in_history_backward()
         if key == Qt.Key_Q:
-            self.close()
-        if key == Qt.Key_E:
-            self.export_file("eps")
-        if key == Qt.Key_S:
             self.save_scene()
-        if key == Qt.Key_R:
-            self.animation()
+            self.close()
+        if key == Qt.Key_G:
+            self.export_icon()
+        if key == Qt.Key_P:
+            self.play()
 
-        if key == Qt.Key_Delete:
-            if self.tb_collection.currentItem():
-                self.generate_icon_in_history_backward()
-                file_path = os.path.join(
-                        os.getcwd(),
-                        "jpg",
-                        str(self.tb_collection.currentItem().text()))
-                os.remove(file_path)
-                self.load_collection()
 
         QMainWindow.keyPressEvent(self, event)
 
@@ -217,13 +232,19 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
             event.ignore()
 
     def mousePressEvent(self, event):
-        if event.button() != Qt.LeftButton:
-            event.ignore()
-            return
-
         item = self.itemAt(event.pos())
         if not item:
             return
+
+        if event.button() == Qt.RightButton:
+            if not item.movable:
+                self.scene_canvas.removeItem(item)
+            return
+
+        #if event.button() != Qt.LeftButton:
+            #event.ignore()
+            #return
+
 
         item.get_original_pixmap()
         pixmap = QPixmap(item.pixmap())
@@ -255,25 +276,27 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
             event.ignore()
             return
         else:
+            #self.show_favor_icon(item)
             pass
+
     def mouseDoubleClickEvent(self, event):
         item = self.itemAt(event.pos())
         if not item:
             return
+        self.show_favor_icon(item)
 
+    def show_favor_icon(self,item):
         self.pix = QPixmap(item.original_pixmap)
+        self.code = item.code()
         self.animation()
+
 
 class Pixmap(QObject):
 
     def __init__(self, pix):
         super(Pixmap, self).__init__()
-
         self.pixmap_item = GraphicsPixmapItem(pix)
-        self.pixmap_item.setOpacity(0.7)
-        self.pixmap_item.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
-        self.pixmap_item.setAcceptsHoverEvents(True)
-        #self.pixmap_item.GraphicsItemFlag(QGraphicsItem.ItemIsMovable)
+
     def _set_pos(self, pos):
         self.pixmap_item.setPos(pos)
 
@@ -283,6 +306,10 @@ class GraphicsPixmapItem(QGraphicsPixmapItem):
 
     def __init__(self, pixmap):
         super(GraphicsPixmapItem, self).__init__()
+        self.setOpacity(0.7)
+        self.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
+        self.setAcceptsHoverEvents(True)
+
         self.original_pixmap = pixmap
         self.setPixmap(pixmap)
         self.setCursor(Qt.OpenHandCursor)
@@ -333,5 +360,6 @@ if __name__ == "__main__":
     import sys
     app = QApplication(sys.argv)
     main_window = MainWindow()
-    main_window.showFullScreen()
+    #main_window.showFullScreen()
+    main_window.show()
     sys.exit(app.exec_())
