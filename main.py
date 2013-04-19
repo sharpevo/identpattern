@@ -5,7 +5,7 @@ import tempfile
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 #from ui_main import Ui_MainWindow
-from lib.identicon import identicon
+from lib.identicon_python import identicon
 from lib.commandstack.commandstack import CommandStack
 
 MAX_HISTORY = 10
