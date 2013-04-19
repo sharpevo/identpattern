@@ -2,6 +2,8 @@ import time
 import shutil
 import os
 import tempfile
+import platform
+import subprocess
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 #from ui_main import Ui_MainWindow
@@ -59,6 +61,9 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         self.animator=QTimer()
         self.animator.timeout.connect(self.generate_icon)
 
+        self.msg = QMessageBox()
+        self.msg_abort_bt = self.msg.addButton("OK", QMessageBox.YesRole)
+        self.msg_check_bt = self.msg.addButton("Check Images", QMessageBox.ActionRole)
     def generate_icon(self, code=0, hist=False, ui=True):
 
         hash_code = code
@@ -161,9 +166,17 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         dst_path = os.path.join(file_type, dst_name)
         item.pixmap().save(dst_path)
         cwd = os.path.join(os.getcwd(), file_type)
-        text = QGraphicsTextItem("File '%s' has been saved in '%s'" % (dst_path, cwd))
-        #text.setPos(-100, -100)
-        #self.scene_canvas.addItem(text)
+        #text = "File '%s' has been saved in '%s'" % (dst_path, cwd)
+        text = "Save image as <b>'%s/%s'</b>" % (cwd, dst_name)
+        self.msg.setInformativeText(text)
+        self.msg.exec_()
+        if self.msg.clickedButton() == self.msg_check_bt:
+            if platform.system() == "Windows":
+                os.startfile(cwd)
+                #subprocess.Popen(['start', cwd])
+            elif platform.system() == "Linux":
+                subprocess.Popen(['xdg-open', cwd])
+
 
     def load_scene(self):
         with open("test.txt", "r") as f:
