@@ -179,22 +179,23 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
 
 
     def load_scene(self):
-        with open("test.txt", "r") as f:
-            for line in f.readlines():
-                code, x, y = line.split(":")
-                self.generate_icon(code, ui=False)
-                pixmap = QPixmap(self.icon_path)
-                item = GraphicsPixmapItem(pixmap)
-                item.moveBy(float(x), float(y))
-                item.setZValue(len(self.scene_canvas.items())+1)
-                item.set_code(code)
-                self.scene_canvas.addItem(item)
+        if os.path.exists("icons"):
+            with open("icons", "r") as f:
+                for line in f.readlines():
+                    code, x, y = line.split(":")
+                    self.generate_icon(code, ui=False)
+                    pixmap = QPixmap(self.icon_path)
+                    item = GraphicsPixmapItem(pixmap)
+                    item.moveBy(float(x), float(y))
+                    item.setZValue(len(self.scene_canvas.items())+1)
+                    item.set_code(code)
+                    self.scene_canvas.addItem(item)
 
 
     def save_scene(self):
         count = self.item_number
         items = self.scene_canvas.items()[:-count]
-        with open("test.txt","w+") as f:
+        with open("icons","w+") as f:
             f.writelines(["%s:%s:%s%s" % (item.code(),
                                         item.pos().x(),
                                         item.pos().y(),
