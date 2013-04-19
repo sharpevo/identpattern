@@ -6,6 +6,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 #from ui_main import Ui_MainWindow
 from lib.identicon_python import identicon
+from lib.random_avatar import Visicon
 from lib.commandstack.commandstack import CommandStack
 
 MAX_HISTORY = 10
@@ -59,12 +60,25 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         self.animator.timeout.connect(self.generate_icon)
 
     def generate_icon(self, code=0, hist=False, ui=True):
-        self.code = identicon.generate_icon(code)
+
+        hash_code = code
+        if not hash_code:
+            import random
+            hash_code = "%032x" % random.getrandbits(128)
+            self.code = int(hash_code[2:], 16)
+        else:
+            self.code = hash_code
+
+        ICON_PATH = os.path.join(tempfile.gettempdir(), "icon.png")
+        visicon = Visicon(str(self.code), "", 72)
+        img = visicon.draw_image()
+        img.save(ICON_PATH)
 
         if not code or hist: # add history only if code = 0
             self.update_hist()
         if ui:
             self.update_ui()
+
 
     def update_hist(self):
         self.history.add_item(self.code)
