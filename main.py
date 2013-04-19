@@ -201,7 +201,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         if key == Qt.Key_Q:
             self.save_scene()
             self.close()
-        if key == Qt.Key_G:
+        if key == Qt.Key_S:
             self.export_icon()
         if key == Qt.Key_P:
             self.play()
