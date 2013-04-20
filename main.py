@@ -2,10 +2,13 @@ import time
 import shutil
 import os
 import tempfile
+import platform
+import subprocess
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 #from ui_main import Ui_MainWindow
-from lib.identicon import identicon
+from lib.identicon_python import identicon
+from lib.random_avatar import Visicon
 from lib.commandstack.commandstack import CommandStack
 
 MAX_HISTORY = 10
@@ -58,13 +61,29 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         self.animator=QTimer()
         self.animator.timeout.connect(self.generate_icon)
 
+        self.msg = QMessageBox()
+        self.msg_abort_bt = self.msg.addButton("OK", QMessageBox.YesRole)
+        self.msg_check_bt = self.msg.addButton("Check Images", QMessageBox.ActionRole)
     def generate_icon(self, code=0, hist=False, ui=True):
-        self.code = identicon.generate_icon(code)
+
+        hash_code = code
+        if not hash_code:
+            import random
+            hash_code = "%032x" % random.getrandbits(128)
+            self.code = int(hash_code[2:], 16)
+        else:
+            self.code = hash_code
+
+        ICON_PATH = os.path.join(tempfile.gettempdir(), "icon.png")
+        visicon = Visicon(str(self.code), "", 72)
+        img = visicon.draw_image()
+        img.save(ICON_PATH)
 
         if not code or hist: # add history only if code = 0
             self.update_hist()
         if ui:
             self.update_ui()
+
 
     def update_hist(self):
         self.history.add_item(self.code)
@@ -103,7 +122,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
                     ((i//mode)-mode/2)*self.pix.height() + self.pix.height()/2))
             anim.setDuration(350+i*25)
             #anim.setDuration(1500)
-            anim.setEasingCurve(QEasingCurve.OutBack)
+            anim.setEasingCurve(QEasingCurve.InOutBack)
             self.animation_group.addAnimation(anim)
         self.animation_group.start()
         #self.scene_canvas.items()[0].pixmap().save("test.jpg")
@@ -112,7 +131,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         if self.animator.isActive():
             self.animator.stop()
         else:
-            self.animator.start(3000)
+            self.animator.start(5000)
         self.generate_icon()
 
     def generate_icon_in_history_backward(self):
@@ -141,33 +160,43 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         if not os.path.exists(file_type):
             os.mkdir(file_type)
 
-        item = self.scene_canvas.items()[self.item_number]
+        item = self.scene_canvas.items()[self.item_number-1]
         timestamp = time.strftime("%Y_%m_%d")
         dst_name = "%s-%s.%s" % (timestamp, item.code(), file_type)
-        dst_path = os.path.join(file_type, dst_name)
-        item.pixmap().save(dst_path)
-        cwd = os.path.join(os.getcwd(), file_type)
-        text = QGraphicsTextItem("File '%s' has been saved in '%s'" % (dst_path, cwd))
-        #text.setPos(-100, -100)
-        #self.scene_canvas.addItem(text)
+        dst_path = os.path.join(cwd, dst_name)
+        if item.pixmap().save(dst_path, format="BMP"):
+            text = "Save image as <b>'%s'</b>" % dst_path
+        else:
+            text = "Cannot save image."
+        self.msg.setInformativeText(text)
+        self.msg.exec_()
+        if self.msg.clickedButton() == self.msg_check_bt:
+            cwd = os.path.join(os.getcwd(), file_type)
+            if platform.system() == "Windows":
+                os.startfile(cwd)
+                #subprocess.Popen(['start', cwd])
+            elif platform.system() == "Linux":
+                subprocess.Popen(['xdg-open', cwd])
+
 
     def load_scene(self):
-        with open("test.txt", "r") as f:
-            for line in f.readlines():
-                code, x, y = line.split(":")
-                self.generate_icon(code, ui=False)
-                pixmap = QPixmap(self.icon_path)
-                item = GraphicsPixmapItem(pixmap)
-                item.moveBy(float(x), float(y))
-                item.setZValue(len(self.scene_canvas.items())+1)
-                item.set_code(code)
-                self.scene_canvas.addItem(item)
+        if os.path.exists("icons"):
+            with open("icons", "r") as f:
+                for line in f.readlines():
+                    code, x, y = line.split(":")
+                    self.generate_icon(code, ui=False)
+                    pixmap = QPixmap(self.icon_path)
+                    item = GraphicsPixmapItem(pixmap)
+                    item.moveBy(float(x), float(y))
+                    item.setZValue(len(self.scene_canvas.items())+1)
+                    item.set_code(code)
+                    self.scene_canvas.addItem(item)
 
 
     def save_scene(self):
         count = self.item_number
         items = self.scene_canvas.items()[:-count]
-        with open("test.txt","w+") as f:
+        with open("icons","w+") as f:
             f.writelines(["%s:%s:%s%s" % (item.code(),
                                         item.pos().x(),
                                         item.pos().y(),
@@ -187,7 +216,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         if key == Qt.Key_Q:
             self.save_scene()
             self.close()
-        if key == Qt.Key_G:
+        if key == Qt.Key_S:
             self.export_icon()
         if key == Qt.Key_P:
             self.play()
