@@ -122,7 +122,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
                     ((i//mode)-mode/2)*self.pix.height() + self.pix.height()/2))
             anim.setDuration(350+i*25)
             #anim.setDuration(1500)
-            anim.setEasingCurve(QEasingCurve.OutBack)
+            anim.setEasingCurve(QEasingCurve.InOutBack)
             self.animation_group.addAnimation(anim)
         self.animation_group.start()
         #self.scene_canvas.items()[0].pixmap().save("test.jpg")
@@ -131,7 +131,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         if self.animator.isActive():
             self.animator.stop()
         else:
-            self.animator.start(3000)
+            self.animator.start(5000)
         self.generate_icon()
 
     def generate_icon_in_history_backward(self):
