@@ -160,7 +160,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         if not os.path.exists(file_type):
             os.mkdir(file_type)
 
-        item = self.scene_canvas.items()[self.item_number]
+        item = self.scene_canvas.items()[self.item_number-1]
         timestamp = time.strftime("%Y_%m_%d")
         dst_name = "%s-%s.%s" % (timestamp, item.code(), file_type)
         dst_path = os.path.join(file_type, dst_name)
