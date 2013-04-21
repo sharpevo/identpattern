@@ -163,6 +163,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         item = self.scene_canvas.items()[self.item_number-1]
         timestamp = time.strftime("%Y_%m_%d")
         dst_name = "%s-%s.%s" % (timestamp, item.code(), file_type)
+        cwd = os.path.join(os.getcwd(), file_type)
         dst_path = os.path.join(cwd, dst_name)
         if item.pixmap().save(dst_path, format="BMP"):
             text = "Save image as <b>'%s'</b>" % dst_path
@@ -171,7 +172,6 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         self.msg.setInformativeText(text)
         self.msg.exec_()
         if self.msg.clickedButton() == self.msg_check_bt:
-            cwd = os.path.join(os.getcwd(), file_type)
             if platform.system() == "Windows":
                 os.startfile(cwd)
                 #subprocess.Popen(['start', cwd])
