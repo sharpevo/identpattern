@@ -63,6 +63,16 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         self.animator.timeout.connect(self.generate_icon)
 
         self.msg = QMessageBox()
+        self.msg.setStyleSheet("""
+QMessageBox, QMessageBox *{
+background: #101010;
+color: #00aaaa;
+}
+QMessageBox QPushButton{
+background: #00aaaa;
+color: #101010;
+}
+                               """)
         self.msg_abort_bt = self.msg.addButton("OK", QMessageBox.YesRole)
         self.msg_check_bt = self.msg.addButton("Check Images", QMessageBox.ActionRole)
     def generate_icon(self, code=0, hist=False, ui=True):
@@ -204,6 +214,28 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
                                         os.linesep)
                                         for item in items])
 
+    def show_help(self):
+        self.msg.setInformativeText(
+            """
+<h2>Keyboard</h2>
+<h3><font color="blue">H</font>: Show this help page.<br><br>
+<font color="blue">J/K</font>: Check next/previous icon.<br><br>
+<font color="blue">P</font>: Automatically check icons in 5s.<br><br>
+<font color="blue">S</font>: Save the current icon to JPG.<br><br>
+<font color="blue">Q</font>: Quit.</h3>
+<h2>Mouse</h2>
+<h3>
+You can collect icons you favor by dragging and dropping it from center canvas to the side.
+<ul>
+<li>To check your favorate icons, you can move mouse upon it and double click it.</li>
+<li>To remove it, you can right click it.</li>
+</ul>
+</h3>
+
+            """)
+        self.msg.exec_()
+
+
     def keyPressEvent(self, event):
         key = event.key()
 
@@ -221,6 +253,8 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
             self.export_icon()
         if key == Qt.Key_P:
             self.play()
+        if key == Qt.Key_H:
+            self.show_help()
 
 
         QGraphicsView.keyPressEvent(self, event)
