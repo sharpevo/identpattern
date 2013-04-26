@@ -123,7 +123,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
                     ((i//mode)-mode/2)*self.pix.height() + self.pix.height()/2))
             anim.setDuration(350+i*25)
             #anim.setDuration(1500)
-            anim.setEasingCurve(QEasingCurve.InOutBack)
+            anim.setEasingCurve(QEasingCurve.InOutElastic)
             self.animation_group.addAnimation(anim)
         self.animation_group.start()
         #self.scene_canvas.items()[0].pixmap().save("test.jpg")
