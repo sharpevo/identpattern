@@ -63,6 +63,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         self.animator.timeout.connect(self.generate_icon)
 
         self.msg = QMessageBox()
+        self.msg.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint)
         self.msg.setStyleSheet("""
 QMessageBox, QMessageBox *{
 background: #101010;
