@@ -223,7 +223,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
             self.play()
 
 
-        QMainWindow.keyPressEvent(self, event)
+        QGraphicsView.keyPressEvent(self, event)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasFormat("application/icondata"):
