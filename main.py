@@ -76,7 +76,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
             self.code = hash_code
 
         ICON_PATH = os.path.join(tempfile.gettempdir(), "icon.png")
-        visicon = Visicon(str(self.code), "", 72)
+        visicon = Visicon(str(self.code), "", 72, background = "#101010")
         img = visicon.draw_image()
         img.save(ICON_PATH)
 
