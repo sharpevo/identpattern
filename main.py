@@ -6,22 +6,18 @@ import platform
 import subprocess
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-#from ui_main import Ui_MainWindow
 from lib.identicon_python import identicon
 from lib.random_avatar import Visicon
 from lib.commandstack.commandstack import CommandStack
 
 MAX_HISTORY = 10
-class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
+class MainWindow(QGraphicsView):
 
     def __init__(self, parent = None):
 
         QMainWindow.__init__(self, parent)
-        #self.setupUi(self)
-        #self.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        #self.DragMode(QGraphicsView.ScrollHandDrag)
         self.setAcceptDrops(True)
 
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint)
@@ -30,19 +26,11 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         screen_size = desktop.availableGeometry()
         self.screen_height = screen_size.height()
 
-        self.scene_canvas = QGraphicsScene()#-640, -400, 1280, 800)
-        #self.scene_canvas = QGraphicsScene(-screen_size.width()/2,
-                #-screen_size.height()/2,
-                #screen_size.width(),
-                #screen_size.height())
-        #self.scene_canvas = QGraphicsScene(-self.screen_height/2,
-                #-self.screen_height/2,
-                #self.screen_height,
-                #self.screen_height)
+        self.scene_canvas = QGraphicsScene()
         self.animation_group = QParallelAnimationGroup()
         self.setScene(self.scene_canvas)
 
-        gradient = QRadialGradient(72,72, screen_size.width()/2)#, 0,0)
+        gradient = QRadialGradient(72,72, screen_size.width()/2)
         gradient.setColorAt(0, QColor("#00aaaa"))
         gradient.setColorAt(1, QColor("#101010"))
         self.setBackgroundBrush(QBrush(gradient))
@@ -57,7 +45,6 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
                 -screen_size.height()/2+self.pix.height(),
                 screen_size.width(),
                 screen_size.height())
-
 
         self.animator=QTimer()
         self.animator.timeout.connect(self.generate_icon)
