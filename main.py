@@ -42,9 +42,9 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         self.animation_group = QParallelAnimationGroup()
         self.setScene(self.scene_canvas)
 
-        gradient = QRadialGradient(0,0, screen_size.width()/2, 0,0)
+        gradient = QRadialGradient(72,72, screen_size.width()/2)#, 0,0)
         gradient.setColorAt(0, QColor("#00aaaa"))
-        gradient.setColorAt(1, QColor("#eeeeee"))
+        gradient.setColorAt(1, QColor("#101010"))
         self.setBackgroundBrush(QBrush(gradient))
         self.history = CommandStack(MAX_HISTORY)
         self.icon_path = os.path.join(tempfile.gettempdir(), "icon.png")
