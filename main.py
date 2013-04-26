@@ -25,6 +25,7 @@ class MainWindow(QGraphicsView):#QMainWindow, Ui_MainWindow):
         self.setAcceptDrops(True)
 
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint)
+        self.setFrameShape(QFrame.NoFrame)
         desktop = QApplication.desktop()
         screen_size = desktop.availableGeometry()
         self.screen_height = screen_size.height()
