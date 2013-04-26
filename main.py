@@ -11,9 +11,11 @@ from lib.random_avatar import Visicon
 from lib.commandstack.commandstack import CommandStack
 
 MAX_HISTORY = 10
+
+
 class MainWindow(QGraphicsView):
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
 
         QMainWindow.__init__(self, parent)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -30,7 +32,7 @@ class MainWindow(QGraphicsView):
         self.animation_group = QParallelAnimationGroup()
         self.setScene(self.scene_canvas)
 
-        gradient = QRadialGradient(72,72, screen_size.width()/2)
+        gradient = QRadialGradient(72, 72, screen_size.width()/2)
         gradient.setColorAt(0, QColor("#00aaaa"))
         gradient.setColorAt(1, QColor("#101010"))
         self.setBackgroundBrush(QBrush(gradient))
@@ -41,12 +43,13 @@ class MainWindow(QGraphicsView):
         self.load_scene()
 
         self.setGeometry(QRect(0, 0, screen_size.width(), screen_size.height()))
-        self.setSceneRect(-screen_size.width()/2+self.pix.width(),
-                -screen_size.height()/2+self.pix.height(),
-                screen_size.width(),
-                screen_size.height())
+        self.setSceneRect(
+            -screen_size.width() / 2 + self.pix.width(),
+            -screen_size.height() / 2 + self.pix.height(),
+            screen_size.width(),
+            screen_size.height())
 
-        self.animator=QTimer()
+        self.animator = QTimer()
         self.animator.timeout.connect(self.generate_icon)
 
         self.msg = QMessageBox()
@@ -63,6 +66,7 @@ color: #101010;
                                """)
         self.msg_abort_bt = self.msg.addButton("OK", QMessageBox.YesRole)
         self.msg_check_bt = self.msg.addButton("Check Images", QMessageBox.ActionRole)
+
     def generate_icon(self, code=0, hist=False, ui=True):
 
         hash_code = code
@@ -74,15 +78,14 @@ color: #101010;
             self.code = hash_code
 
         ICON_PATH = os.path.join(tempfile.gettempdir(), "icon.png")
-        visicon = Visicon(str(self.code), "", 72, background = "#101010")
+        visicon = Visicon(str(self.code), "", 72, background="#101010")
         img = visicon.draw_image()
         img.save(ICON_PATH)
 
-        if not code or hist: # add history only if code = 0
+        if not code or hist:  # add history only if code = 0
             self.update_hist()
         if ui:
             self.update_ui()
-
 
     def update_hist(self):
         self.history.add_item(self.code)
@@ -116,9 +119,14 @@ color: #101010;
             item.pixmap_item.set_code(self.code)
             self.scene_canvas.addItem(item.pixmap_item)
             anim = QPropertyAnimation(item, "pos")
-            anim.setStartValue(QPointF(-self.pix.width()/2, -self.pix.height()/2))
-            anim.setEndValue(QPointF(((i%mode)-mode/2)*self.pix.width() + self.pix.width()/2,
-                    ((i//mode)-mode/2)*self.pix.height() + self.pix.height()/2))
+            start_point = QPointF(
+                -self.pix.width() / 2,
+                -self.pix.height() / 2)
+            end_point = QPointF(
+                ((i % mode) - mode / 2) * self.pix.width() + self.pix.width() / 2,
+                ((i // mode) - mode / 2) * self.pix.height() + self.pix.height() / 2)
+            anim.setStartValue(start_point)
+            anim.setEndValue(end_point)
             anim.setDuration(350+i*25)
             #anim.setDuration(1500)
             anim.setEasingCurve(QEasingCurve.InOutElastic)
@@ -177,7 +185,6 @@ color: #101010;
             elif platform.system() == "Linux":
                 subprocess.Popen(['xdg-open', cwd])
 
-
     def load_scene(self):
         if os.path.exists("icons"):
             with open("icons", "r") as f:
@@ -191,16 +198,15 @@ color: #101010;
                     item.set_code(code)
                     self.scene_canvas.addItem(item)
 
-
     def save_scene(self):
         count = self.item_number
         items = self.scene_canvas.items()[:-count]
-        with open("icons","w+") as f:
+        with open("icons", "w+") as f:
             f.writelines(["%s:%s:%s%s" % (item.code(),
-                                        item.pos().x(),
-                                        item.pos().y(),
-                                        os.linesep)
-                                        for item in items])
+                                          item.pos().x(),
+                                          item.pos().y(),
+                                          os.linesep)
+                          for item in items])
 
     def show_help(self):
         self.msg.setInformativeText(
@@ -213,7 +219,8 @@ color: #101010;
 <font color="blue">Q</font>: Quit.</h3>
 <h2>Mouse</h2>
 <h3>
-You can collect icons you favor by dragging and dropping it from center canvas to the side.
+You can collect icons you favor by dragging and dropping it from center canvas to the \
+            side.
 <ul>
 <li>To check your favorate icons, you can move mouse upon it and double click it.</li>
 <li>To remove it, you can right click it.</li>
@@ -222,7 +229,6 @@ You can collect icons you favor by dragging and dropping it from center canvas t
 
             """)
         self.msg.exec_()
-
 
     def keyPressEvent(self, event):
         key = event.key()
@@ -243,7 +249,6 @@ You can collect icons you favor by dragging and dropping it from center canvas t
             self.play()
         if key == Qt.Key_H:
             self.show_help()
-
 
         QGraphicsView.keyPressEvent(self, event)
 
@@ -268,12 +273,12 @@ You can collect icons you favor by dragging and dropping it from center canvas t
 
             new_item = Pixmap(pixmap)
             scene_pos = self.mapToScene(event.pos())
-            new_item.pixmap_item.moveBy(scene_pos.x()-self.offset.x(), scene_pos.y()-self.offset.y())
+            new_item.pixmap_item.moveBy(scene_pos.x() - self.offset.x(),
+                                        scene_pos.y() - self.offset.y())
             new_item.pixmap_item.get_original_pixmap()
             new_item.pixmap_item.setZValue(len(self.scene_canvas.items())+1)
             new_item.pixmap_item.set_code(event.mimeData().text())
             self.scene_canvas.addItem(new_item.pixmap_item)
-
 
             if event.source() == self:
                 event.setDropAction(Qt.MoveAction)
@@ -296,7 +301,6 @@ You can collect icons you favor by dragging and dropping it from center canvas t
         #if event.button() != Qt.LeftButton:
             #event.ignore()
             #return
-
 
         item.get_original_pixmap()
         pixmap = QPixmap(item.pixmap())
@@ -337,7 +341,7 @@ You can collect icons you favor by dragging and dropping it from center canvas t
             return
         self.show_favor_icon(item)
 
-    def show_favor_icon(self,item):
+    def show_favor_icon(self, item):
         self.pix = QPixmap(item.original_pixmap)
         self.code = item.code()
         self.animation()
@@ -354,6 +358,7 @@ class Pixmap(QObject):
 
     pos = pyqtProperty(QPointF, fset=_set_pos)
 
+
 class GraphicsPixmapItem(QGraphicsPixmapItem):
 
     def __init__(self, pixmap):
@@ -365,7 +370,7 @@ class GraphicsPixmapItem(QGraphicsPixmapItem):
         self.original_pixmap = pixmap
         self.setPixmap(pixmap)
         self.setCursor(Qt.OpenHandCursor)
-        self.movable=False
+        self.movable = False
 
     def get_movable(self):
         return self.movable
