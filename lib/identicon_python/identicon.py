@@ -20,10 +20,10 @@ Return a PIL Image class instance which have generated identicon image.
 """
 
 # PIL Modules
-import Image
-import ImageDraw
-import ImagePath
-import ImageColor
+import PIL.Image as Image
+import PIL.ImageDraw as ImageDraw
+import PIL.ImagePath as ImagePath
+import PIL.ImageColor as ImageColor
 import tempfile
 import os.path
 
